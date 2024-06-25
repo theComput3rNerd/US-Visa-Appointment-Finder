@@ -3,6 +3,7 @@ import json
 import random
 import requests
 import configparser
+import boto3
 from datetime import datetime
 
 from selenium import webdriver
@@ -44,7 +45,7 @@ PUSHOVER_TOKEN = config['NOTIFICATION']['PUSHOVER_TOKEN']
 PUSHOVER_USER = config['NOTIFICATION']['PUSHOVER_USER']
 # Get push notifications via PERSONAL WEBSITE http://yoursite.com (Optional)
 PERSONAL_SITE_USER = config['NOTIFICATION']['PERSONAL_SITE_USER']
-PERSONAL_SITE_PASS = config['NOTIFICATION']['PERSONAL_SITE_PASS']
+PERSONAL_SITE_PASS = config['NOTIFICATION'][ 'PERSONAL_SITE_PASS']
 PUSH_TARGET_EMAIL = config['NOTIFICATION']['PUSH_TARGET_EMAIL']
 PERSONAL_PUSHER_URL = config['NOTIFICATION']['PERSONAL_PUSHER_URL']
 
