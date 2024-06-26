@@ -4,7 +4,10 @@ import random
 import requests
 import configparser
 import boto3
+import traceback
+
 from datetime import datetime
+
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -48,6 +51,9 @@ PERSONAL_SITE_USER = config['NOTIFICATION']['PERSONAL_SITE_USER']
 PERSONAL_SITE_PASS = config['NOTIFICATION'][ 'PERSONAL_SITE_PASS']
 PUSH_TARGET_EMAIL = config['NOTIFICATION']['PUSH_TARGET_EMAIL']
 PERSONAL_PUSHER_URL = config['NOTIFICATION']['PERSONAL_PUSHER_URL']
+# Get notifications via AWS SNS (Optional)
+TOPIC_ARN = config['NOTIFICATION']['TOPIC_ARN']
+REGION_NAME = config['NOTIFICATION']['REGION_NAME']
 
 # Time Section:
 minute = 60
@@ -113,6 +119,14 @@ def send_notification(title, msg):
             "msg": msg,
         }
         requests.post(url, data)
+    if TOPIC_ARN:
+        client = boto3.client('sns', region_name=REGION_NAME)
+        response = client.publish(
+            Message = msg,
+            Subject = title,
+            TopicArn = TOPIC_ARN,
+            )
+        
 
 
 def auto_action(label, find_by, el_type, action, value, sleep_time=0):
@@ -292,9 +306,9 @@ if __name__ == "__main__":
                     print(msg)
                     info_logger(LOG_FILE_NAME, msg)
                     time.sleep(RETRY_WAIT_TIME)
-        except:
+        except Exception as e:
             # Exception Occured
-            msg = f"Break the loop after exception!\n"
+            msg = f"Break the loop after exception!\n" + str(e) + '\n' + str(traceback.print_exc())
             END_MSG_TITLE = "EXCEPTION"
             break
 
