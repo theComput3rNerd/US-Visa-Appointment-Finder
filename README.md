@@ -15,6 +15,14 @@ Got time successfully! 2024-07-08 08:00
 Sending notification!
 ```
 
+## Screenshot: finding a facility ID
+
+The appointment page exposes the consular location and facility ID in its HTML. I used Chrome DevTools to inspect the location selector and confirm the numeric value before adding it to `embassy.py`.
+
+![Chrome DevTools showing the appointment facility ID](_img.png)
+
+To repeat this process, open the appointment page, choose **Inspect**, find the location `<select>`, and read the selected `<option>` value. Facility IDs and page markup can change, so this is a validation step rather than a permanent source of truth.
+
 ## Key features
 
 - Automates Chrome sign-in with Selenium.
@@ -86,6 +94,15 @@ Google Chrome must also be installed. With `LOCAL_USE = True`, Selenium uses the
 
 The Nairobi facility is currently defined in `embassy.py` as facility ID `104`. Facility IDs and website selectors can change, so verify them against the current scheduling flow before running the tool.
 
+### Finding a facility ID
+
+1. Sign in to the scheduling website and open the rescheduling page.
+2. Inspect the consular location dropdown in Chrome DevTools.
+3. Find the `<option>` for the desired embassy and copy its `value` attribute.
+4. Update the matching entry in `embassy.py` and confirm the regional URL code and localized Continue label.
+
+The included screenshot documents the exact inspection technique used during development. It shows a Yerevan example from the broader embassy configuration, while the active project configuration targets Nairobi.
+
 ## Running the project
 
 After activating the virtual environment and configuring the account:
@@ -131,6 +148,20 @@ Using the browser session for the availability requests was important because th
 - Appointment availability is transient, so the script needed bounded polling intervals, randomized delays, and cooldown behavior.
 - Notification delivery had to remain optional so the core monitor could be tested without external services.
 - Configuration and secrets are operational concerns, not just code concerns. A future version should use environment variables or a secrets manager instead of a credential-bearing INI file.
+
+## Deployment and operations notes
+
+The project also provided a practical introduction to running a polling workload outside a local laptop. The main lessons were:
+
+- Containerize the script and publish images through Amazon ECR for repeatable deployments.
+- Use ECS Fargate or a scheduled EventBridge task when an always-on server is unnecessary.
+- Store account credentials and notification tokens in AWS Secrets Manager or SSM Parameter Store instead of the repository.
+- Centralize logs in CloudWatch Logs and monitor failures, notification delivery, and repeated empty responses.
+- Use least-privilege IAM permissions for SNS publishing and secret access.
+- Treat retry intervals, cooldown periods, and jitter as both reliability and cost controls.
+- Capture deployment settings in CloudFormation or Terraform when the service needs to be recreated consistently.
+
+The current repository includes the AWS SNS notification experiment in `nsstest.py`; the other deployment items are operational directions for a production-ready version rather than prerequisites for running the local script.
 
 ## Limitations and future improvements
 
